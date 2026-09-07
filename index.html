@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storytelling with Data: Cien Años de Pantalla</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'paper-bg': '#ffffff',
+                        'paper-text': '#1e293b', /* Slate 800 */
+                        'paper-muted': '#64748b', /* Slate 500 */
+                        'paper-accent': '#b45309' /* Amber 700 - Elegante y sobrio */
+                    },
+                    fontFamily: {
+                        'display': ['Bebas Neue', 'sans-serif'],
+                        'body': ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome para Íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #ffffff; color: #1e293b; }
+        h1, h2, h3 { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.05em; }
+        .fade-enter-active, .fade-leave-active { transition: opacity 0.4s ease; }
+        .fade-enter-from, .fade-leave-to { opacity: 0; transform: translateY(10px); }
+        
+        /* Sombra sutil para las imágenes de gráficas */
+        .chart-img {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            border: 1px solid #f1f5f9;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen overflow-hidden flex flex-col items-center justify-center relative bg-paper-bg">
+
+    <div id="app" class="w-full h-full max-w-7xl mx-auto flex flex-col p-8">
+        
+        <!-- Header / Nav (Minimalista) -->
+        <header class="flex justify-between items-center pb-6 border-b border-slate-200 text-xs tracking-widest uppercase text-paper-muted">
+            <div>Storytelling with Data <span class="text-slate-300 mx-2">|</span> Análisis IMDB</div>
+            <div>Página {{ currentSlide + 1 }} de {{ slides.length }}</div>
+        </header>
+
+        <!-- Slide Container -->
+        <main class="flex-grow flex flex-col justify-center relative w-full h-full mt-6">
+            <transition name="fade" mode="out-in">
+                <div :key="currentSlide" class="w-full h-full flex flex-col justify-center items-center text-center">
+                    
+                    <!-- 1. TÍTULO -->
+                    <template v-if="slides[currentSlide].type === 'title'">
+                        <p class="text-paper-accent tracking-[0.2em] mb-4 text-sm font-semibold">{{ slides[currentSlide].subtitle }}</p>
+                        <h1 class="text-8xl md:text-9xl mb-6 leading-none text-slate-900">{{ slides[currentSlide].title }}</h1>
+                        <p class="text-xl md:text-2xl max-w-3xl text-paper-muted mb-12 font-light">{{ slides[currentSlide].description }}</p>
+                        <div class="flex space-x-12 text-sm tracking-widest text-slate-400 uppercase font-semibold">
+                            <span>1920 - 2020</span>
+                            <span>1,000 Títulos</span>
+                            <span>3 Hallazgos</span>
+                        </div>
+                        <div class="mt-12">
+                            <button @click="nextSlide" class="bg-paper-accent text-white px-6 py-3 rounded-full shadow hover:shadow-lg transition-shadow uppercase tracking-widest font-semibold">Comenzar</button>
+                        </div>
+                    </template>
+
+                    <!-- 2. CÍRCULO DORADO -->
+                    <template v-if="slides[currentSlide].type === 'golden-circle'">
+                        <p class="text-paper-accent tracking-widest mb-2 text-sm uppercase font-semibold">Marco Teórico</p>
+                        <h2 class="text-5xl text-slate-900 mb-16 uppercase tracking-wider">Por Qué / Cómo / Qué</h2>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-10 text-left max-w-6xl">
+                            <div class="p-8 bg-slate-50 border border-slate-100 rounded-xl hover:shadow-md transition-shadow">
+                                <h3 class="text-3xl text-paper-accent mb-4">01 Por Qué</h3>
+                                <p class="text-slate-600 font-light leading-relaxed">Creemos que los datos, bien contados, cambian la forma en que entendemos cualquier industria creativa — el cine incluido. Esta charla existe para demostrarlo, no solo para afirmarlo.</p>
+                            </div>
+                            <div class="p-8 bg-slate-50 border border-slate-100 rounded-xl hover:shadow-md transition-shadow">
+                                <h3 class="text-3xl text-paper-accent mb-4">02 Cómo</h3>
+                                <p class="text-slate-600 font-light leading-relaxed">Analizando cien años de las películas mejor calificadas de IMDB para encontrar patrones de género, prestigio e industria que la intuición, sola, no ve.</p>
+                            </div>
+                            <div class="p-8 bg-slate-50 border border-slate-100 rounded-xl hover:shadow-md transition-shadow">
+                                <h3 class="text-3xl text-paper-accent mb-4">03 Qué</h3>
+                                <p class="text-slate-600 font-light leading-relaxed">Tres hallazgos sustentados en datos: un giro de lo conceptual a lo visual, una paradoja llamada Film-Noir, y el verdadero peso de directores, actores y duración.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Enlace a Kaggle ajustado -->
+                        <div class="mt-10 text-slate-500 text-sm font-light">
+                            Fuente de datos: 
+                            <a href="https://www.kaggle.com/datasets/harshitshankhdhar/imdb-dataset-of-top-1000-movies-and-tv-shows" 
+                               target="_blank" 
+                               rel="noopener noreferrer" 
+                               class="text-paper-accent hover:underline font-semibold transition-colors">
+                               IMDb Dataset of Top 1000 Movies and TV Shows (Kaggle)
+                            </a>
+                        </div>
+                    </template>
+
+                    <!-- 3. GRAN PREGUNTA (Statement) -->
+                    <template v-if="slides[currentSlide].type === 'statement'">
+                        <p class="text-paper-accent tracking-widest mb-6 text-sm uppercase font-semibold">La Necesidad</p>
+                        <h2 class="text-4xl md:text-6xl text-slate-900 max-w-5xl leading-tight mb-16">
+                            "¿El cine que triunfa hoy es el mismo que triunfaba hace cien años - o cambió lo que significa contar una buena historia?"
+                        </h2>
+                        <div class="grid grid-cols-3 gap-8 text-left max-w-5xl text-slate-500 font-light text-lg">
+                            <p>Las tendencias narrativas se movieron de lo conceptual hacia lo visual.</p>
+                            <p>El cine independiente (Film-Noir) gana poco, pero se valora muchísimo.</p>
+                            <p>Directores, actores y duración también dejan huella — pero no la que se asume.</p>
+                        </div>
+                    </template>
+
+                    <!-- 4. CONTEXTO (Stats) -->
+                    <template v-if="slides[currentSlide].type === 'stats'">
+                        <p class="text-paper-accent tracking-widest mb-2 text-sm uppercase font-semibold">Aventura</p>
+                        <h2 class="text-5xl text-slate-900 mb-8 uppercase tracking-wider">El Contexto</h2>
+                        <p class="text-xl text-slate-600 font-light max-w-4xl mb-16">Si el cine fuera un cielo nocturno, esta base de datos no es todo el firmamento - son solo las mil estrellas más brillantes: las películas mejor calificadas de IMDB entre 1920 y 2020.</p>
+                        
+                        <div class="grid grid-cols-4 gap-8 text-center w-full max-w-5xl">
+                            <div class="p-6">
+                                <div class="text-5xl text-slate-900 mb-2 font-display">1920-2020</div>
+                                <div class="text-sm text-paper-muted uppercase tracking-widest">Rango Temporal</div>
+                            </div>
+                            <div class="p-6 border-l border-slate-200">
+                                <div class="text-5xl text-slate-900 mb-2 font-display">1,000</div>
+                                <div class="text-sm text-paper-muted uppercase tracking-widest">Títulos Mejor Calificados</div>
+                            </div>
+                            <div class="p-6 border-l border-slate-200">
+                                <div class="text-5xl text-slate-900 mb-2 font-display">21</div>
+                                <div class="text-sm text-paper-muted uppercase tracking-widest">Géneros Únicos</div>
+                            </div>
+                            <div class="p-6 border-l border-slate-200">
+                                <div class="text-5xl text-slate-900 mb-2 font-display">17</div>
+                                <div class="text-sm text-paper-muted uppercase tracking-widest">Variables (rating, taquilla...)</div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- 5. DIAPOSITIVAS CON IMAGEN (Gráficas) -->
+                    <template v-if="slides[currentSlide].type === 'image-slide'">
+                        <div class="flex flex-col md:flex-row w-full h-full items-center justify-between text-left">
+                            
+                            <!-- Columna de Texto -->
+                            <div class="w-full md:w-1/3 pr-8 flex flex-col justify-center">
+                                <p class="text-paper-accent tracking-widest mb-3 text-xs uppercase font-semibold">{{ slides[currentSlide].chapter }}</p>
+                                <h2 class="text-4xl text-slate-900 uppercase leading-none mb-6">{{ slides[currentSlide].title }}</h2>
+                                <p class="text-slate-600 font-light text-lg leading-relaxed">{{ slides[currentSlide].description }}</p>
+                            </div>
+                            
+                            <!-- Columna de Imagen -->
+                            <div class="w-full md:w-2/3 h-[70vh] flex items-center justify-center p-4">
+                                <img :src="slides[currentSlide].img" alt="Gráfico de Análisis" class="chart-img max-w-full max-h-full object-contain rounded-lg bg-white">
+                            </div>
+
+                        </div>
+                    </template>
+
+                    <!-- Slide Type: Carrusel (Top Taquilla) -->
+                    <template v-if="slides[currentSlide].type === 'carousel'">
+                        <p class="text-paper-accent tracking-widest mb-2 text-sm uppercase font-semibold">Evidencia</p>
+                        <h2 class="text-5xl text-slate-900 mb-6 uppercase tracking-wider">{{ slides[currentSlide].title }}</h2>
+                        <p class="text-xl text-slate-600 font-light max-w-4xl mb-6">{{ slides[currentSlide].description }}</p>
+                        
+                        <!-- Contenedor Principal del Carrusel con Botones -->
+                        <div class="relative w-full max-w-6xl flex items-center mt-2 mb-4">
+                            
+                            <!-- Botón Izquierda -->
+                            <button @click="scrollCarousel('left')" class="absolute -left-4 md:-left-12 z-20 bg-white border border-slate-200 text-slate-500 hover:text-paper-accent rounded-full p-2 shadow hover:shadow-md transition-all">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                            </button>
+
+                            <!-- Contenedor del Carrusel (Scroll Horizontal con Snap) -->
+                            <div ref="carouselContainer" class="w-full flex gap-6 overflow-x-auto snap-x snap-mandatory px-4 py-4 scroll-smooth" style="-ms-overflow-style: none; scrollbar-width: none;">
+                                
+                                <div v-for="(movie, index) in slides[currentSlide].movies" :key="index" 
+                                     class="snap-center shrink-0 w-80 bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-lg transition-shadow overflow-hidden flex flex-col text-left">
+                                    
+                                    <!-- Portada de la película -->
+                                    <div class="h-56 w-full bg-slate-100 relative">
+                                        <div class="absolute top-2 left-2 bg-paper-accent text-white font-display text-2xl px-3 py-1 rounded shadow-md z-10">#{{ index + 1 }}</div>
+                                        <img :src="movie.poster" :alt="movie.title" class="w-full h-full object-cover object-top">
+                                    </div>
+                                    
+                                    <div class="p-6 flex flex-col flex-grow">
+                                        <h3 class="text-2xl text-slate-900 font-bold mb-1 leading-tight h-16">{{ movie.title }}</h3>
+                                        <div class="text-sm font-semibold text-slate-500 mb-4 h-10">{{ movie.genre }}</div>
+                                        
+                                        <div class="mt-auto pt-4 border-t border-slate-100">
+                                            <div class="flex justify-between items-center mb-3">
+                                                <span class="text-xs uppercase tracking-widest text-slate-400">Recaudación</span>
+                                                <span class="text-xl font-bold text-emerald-600">${{ movie.gross }}M</span>
+                                            </div>
+                                            <div class="flex justify-between items-center mb-2">
+                                                <span class="text-xs uppercase tracking-widest text-slate-400">Rating IMDB</span>
+                                                <span class="text-sm font-semibold text-slate-700">{{ movie.rating }} / 10</span>
+                                            </div>
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-xs uppercase tracking-widest text-slate-400">Director</span>
+                                                <span class="text-sm text-slate-700 truncate max-w-[120px] text-right">{{ movie.director }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!-- Botón Derecha -->
+                            <button @click="scrollCarousel('right')" class="absolute -right-4 md:-right-12 z-20 bg-white border border-slate-200 text-slate-500 hover:text-paper-accent rounded-full p-2 shadow hover:shadow-md transition-all">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                            </button>
+                        </div>
+                    </template>
+
+                    <!-- 6. RESUMEN FINAL -->
+                    <!-- Slide Type: Resumen Final con Íconos -->
+                    <template v-if="slides[currentSlide].type === 'summary'">
+                        <p class="text-paper-accent tracking-widest mb-2 text-sm uppercase font-semibold">El Retorno</p>
+                        <h2 class="text-5xl text-slate-900 mb-16 uppercase tracking-wider">Lo Que Aprendimos</h2>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-10 text-left max-w-6xl mb-12">
+                            <div class="pb-6 border-b border-slate-300 flex flex-col">
+                                <i class="fa-solid fa-chart-line text-4xl text-paper-accent mb-4"></i>
+                                <h3 class="text-2xl text-slate-900 mb-2">1. La Tendencia</h3>
+                                <p class="text-slate-600 font-light">De lo conceptual a lo visual: confirmado. La brecha se triplicó entre 1920 y 2010.</p>
+                            </div>
+                            <div class="pb-6 border-b border-slate-300 flex flex-col">
+                                <i class="fa-solid fa-masks-theater text-4xl text-paper-accent mb-4"></i>
+                                <h3 class="text-2xl text-slate-900 mb-2">2. La Paradoja</h3>
+                                <p class="text-slate-600 font-light">Film-Noir: la crítica más alta (93.7), la taquilla más baja ($2M). Prestigio y popularidad no son lo mismo.</p>
+                            </div>
+                            <div class="pb-6 border-b border-slate-300 flex flex-col">
+                                <i class="fa-solid fa-users text-4xl text-paper-accent mb-4"></i>
+                                <h3 class="text-2xl text-slate-900 mb-2">3. El Rol Humano</h3>
+                                <p class="text-slate-600 font-light">Los votos predicen la taquilla; el rating de la crítica casi no. La popularidad manda en la industria.</p>
+                            </div>
+                        </div>
+
+                        <div class="p-8 bg-slate-100 rounded-lg max-w-4xl text-left border-l-4 border-paper-accent">
+                            <h4 class="text-sm tracking-widest text-paper-accent uppercase font-semibold mb-2"><i class="fa-solid fa-circle-question mr-2"></i>Nuevas Incógnitas</h4>
+                            <p class="text-slate-700 font-light italic">"¿Este giro hacia lo visual se acelera o se estabiliza en la era del streaming (2020+)? <br> ¿El efecto de 'más géneros, más taquilla' se sostiene fuera del top 1,000?"</p>
+                        </div>
+                    </template>
+
+                    <!-- Slide Type: Conclusiones (Listado Grid con Íconos) -->
+                    <template v-if="slides[currentSlide].type === 'conclusions'">
+                        <p class="text-paper-accent tracking-widest mb-2 text-sm uppercase font-semibold">{{ slides[currentSlide].chapter }}</p>
+                        <h2 class="text-4xl md:text-5xl text-slate-900 mb-10 uppercase tracking-wider">{{ slides[currentSlide].title }}</h2>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left max-w-6xl w-full">
+                            <div v-for="(item, index) in slides[currentSlide].items" :key="index" 
+                                 class="p-6 bg-slate-50 border border-slate-100 rounded-xl hover:shadow-md transition-shadow">
+                                <div class="flex items-start mb-3">
+                                    <div class="flex-shrink-0 w-12 h-12 rounded-full bg-amber-100 text-paper-accent flex items-center justify-center mr-4">
+                                        <i :class="item.icon" class="text-xl"></i>
+                                    </div>
+                                    <h3 class="text-xl text-slate-800 font-bold leading-tight mt-2">{{ item.title }}</h3>
+                                </div>
+                                <p class="text-slate-600 font-light text-sm leading-relaxed">{{ item.text }}</p>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Slide Type: Framework Recap (Meta-Análisis) -->
+                    <template v-if="slides[currentSlide].type === 'framework-recap'">
+                        <p class="text-paper-accent tracking-widest mb-2 text-sm uppercase font-semibold">{{ slides[currentSlide].chapter }}</p>
+                        <h2 class="text-4xl md:text-5xl text-slate-900 mb-4 uppercase tracking-wider">{{ slides[currentSlide].title }}</h2>
+                        <p class="text-lg text-slate-600 font-light max-w-4xl mb-10">{{ slides[currentSlide].description }}</p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left max-w-7xl w-full px-4">
+                            <div v-for="(step, index) in slides[currentSlide].steps" :key="index" 
+                                 class="p-6 bg-white border-t-4 border-paper-accent shadow-sm hover:shadow-md transition-shadow flex flex-col relative overflow-hidden">
+                                <!-- Número de fondo sutil -->
+                                <div class="absolute -bottom-4 -right-2 text-8xl font-display text-slate-50 opacity-50 pointer-events-none">{{ index + 1 }}</div>
+                                
+                                <div class="flex items-center mb-4 z-10">
+                                    <i :class="step.icon" class="text-2xl text-paper-accent mr-3"></i>
+                                    <h3 class="text-xl text-slate-900 font-bold uppercase tracking-wide">{{ step.title }}</h3>
+                                </div>
+                                <p class="text-slate-600 font-light text-sm leading-relaxed z-10">{{ step.text }}</p>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </transition>
+        </main>
+
+        <!-- Footer / Controls -->
+        <footer class="pt-6 flex justify-between items-center text-slate-400 border-t border-slate-200 mt-4">
+            <button @click="prevSlide" :disabled="currentSlide === 0" class="hover:text-paper-accent disabled:opacity-30 transition-colors flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                <span class="text-sm font-semibold uppercase tracking-wider">Anterior</span>
+            </button>
+            
+            <div class="flex space-x-2">
+                <span v-for="(slide, index) in slides" :key="index" 
+                      class="h-2 w-2 rounded-full transition-colors duration-300"
+                      :class="index === currentSlide ? 'bg-paper-accent' : 'bg-slate-200'">
+                </span>
+            </div>
+
+            <button @click="nextSlide" :disabled="currentSlide === slides.length - 1" class="hover:text-paper-accent disabled:opacity-30 transition-colors flex items-center">
+                <span class="text-sm font-semibold uppercase tracking-wider">Siguiente</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+            </button>
+        </footer>
+
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    currentSlide: 0,
+                    slides: [
+                        {
+                            type: 'title',
+                            subtitle: 'Un Estudio de Caso · IMDB Top 1000',
+                            title: 'Cien Años de Pantalla',
+                            description: '¿Qué nos dicen mil películas —de Das Cabinet des Dr. Caligari a los estrenos de 2020— sobre cómo cambió el arte de contar historias en el cine?'
+                        },
+                        { type: 'golden-circle' },
+                        { type: 'statement' },
+                        { type: 'stats' },
+                        {
+                            type: 'image-slide',
+                            chapter: 'Capítulo 1 · Búsqueda',
+                            title: 'La Nube de Géneros',
+                            description: 'Un aporte propio al análisis: muchas películas llevan más de un género a la vez. Separamos esa cadena de texto para entender la frecuencia y el peso real de cada género en la historia del cine.',
+                            img: 'img/wordcloud.png'
+                        },
+                        {
+                            type: 'image-slide',
+                            chapter: 'Capítulo 1 · Búsqueda',
+                            title: 'Combinaciones Exitosas',
+                            description: 'Al analizar las intersecciones (UpSet Plot), descubrimos qué mezclas específicas de géneros componen las películas más taquilleras y exitosas de nuestra base de datos.',
+                            img: 'img/Upset1.png' // <-- AQUÍ ESTÁ LA GRÁFICA DE UPSET SOLICITADA
+                        },
+                        {
+                            type: 'image-slide',
+                            chapter: 'Panorama',
+                            title: 'Así se reparte la recaudación',
+                            description: 'Cada bloque representa un género. El tamaño del cuadro y el tono nos indican su recaudación media, mostrando un dominio absoluto de Sci-Fi, Adventure y Action.',
+                            img: 'img/Gross.png'
+                        },
+                        {
+                            type: 'carousel',
+                            title: 'El Dominio de la Acción y Aventura',
+                            description: 'El Top 5 absoluto de ingresos lo confirma: las historias que combinan Acción, Aventura y Sci-Fi/Fantasía son las dueñas indiscutibles de la taquilla mundial.',
+                            movies: [
+                                { title: 'Star Wars: The Force Awakens', genre: 'Action, Adventure, Sci-Fi', gross: '936.6', rating: '7.9', director: 'J.J. Abrams', poster: 'img/StarWars_TheForceAwakens.jpg' },
+                                { title: 'Avengers: Endgame', genre: 'Action, Adventure, Drama', gross: '858.3', rating: '8.4', director: 'Anthony Russo', poster: 'img/Avengers_Endgame.jpg' },
+                                { title: 'Avatar', genre: 'Action, Adventure, Fantasy', gross: '760.5', rating: '7.8', director: 'James Cameron', poster: 'img/Avatar.jpg' },
+                                { title: 'Avengers: Infinity War', genre: 'Action, Adventure, Sci-Fi', gross: '678.8', rating: '8.4', director: 'Anthony Russo', poster: 'img/Avengers_Infinity_War.jpg' },
+                                { title: 'Titanic', genre: 'Drama, Romance', gross: '659.3', rating: '7.8', director: 'James Cameron', poster: 'img/Titanic.jpg' }
+                            ]
+                        },
+                        {
+                            type: 'image-slide',
+                            chapter: 'Capítulo 2 · Revelación',
+                            title: 'La Paradoja Film-Noir',
+                            description: 'El cine independiente (Film-Noir) cuenta con la crítica más alta de todos los géneros (93.7), pero recauda la taquilla más baja (apenas $2M promedio). El prestigio no equivale a popularidad masiva.',
+                            img: 'img/burbujas.png'
+                        },
+                        {
+                            type: 'image-slide',
+                            chapter: 'Capítulo 2 · Evidencia',
+                            title: 'Autores de Culto',
+                            description: 'Los nombres detrás de estas películas — Wilder, Hitchcock, Welles, Kubrick, Huston — son autores de culto, no directores de taquilla. La crítica los adora; el box office, casi nunca los nota.',
+                            img: 'img/Film-Noir.png'
+                        },
+                        {
+                            type: 'image-slide',
+                            chapter: 'Capítulo 3 · Retorno',
+                            title: 'El Rol de la Duración',
+                            description: 'La duración media se ha establecido en 122.9 minutos. La distribución nos muestra un pico claro, indicando cómo el tiempo de ejecución se estandarizó como norma en la industria.',
+                            img: 'img/tiempo.png'
+                        },
+                        {
+                            type: 'image-slide',
+                            chapter: 'Capítulo 3 · Retorno',
+                            title: 'El Peso del Director',
+                            description: 'Los nombres detrás de las películas dejan huella. Sin embargo, los directores de culto aclamados por la crítica a menudo difieren de los líderes indiscutibles del Box Office.',
+                            img: 'img/directoresTop.png'
+                        },
+                        {
+                            type: 'image-slide',
+                            chapter: 'Capítulo 3 · Retorno',
+                            title: 'Eficiencia Creativa',
+                            description: 'A medida que aumentan las películas por década, ¿se mantiene la calidad? Esta relación entre el total de películas producidas y el rating promedio revela la evolución del estándar de calidad.',
+                            img: 'img/creatividad.png'
+                        },
+                        // NOTA: El mapa de calor ahora está aquí, validando matemáticamente todo lo anterior
+                        {
+                            type: 'image-slide',
+                            chapter: 'El Clímax Analítico',
+                            title: 'Mapa de Correlaciones',
+                            description: 'El mapa de calor de variables numéricas confirma una fuerte relación entre los Votos y la Recaudación (0.60). También revela una correlación negativa moderada entre el Año de Lanzamiento y el Meta-score (-0.34), indicando que las películas más antiguas suelen retener valoraciones críticas más altas.',
+                            img: 'img/correlacion.png'
+                        },
+                        {
+                            type: 'conclusions',
+                            chapter: 'Resumen General',
+                            title: 'Tendencias y Producción',
+                            items: [
+                                { icon: 'fa-solid fa-arrow-trend-up', title: 'Crecimiento Anual', text: 'Existe una tendencia creciente tanto en el número de películas lanzadas por año como en la suma total de ingresos generados, con picos notables en las décadas más recientes.' },
+                                { icon: 'fa-solid fa-wand-magic-sparkles', title: 'Migración Narrativa', text: 'Mientras las "Historias Conceptuales" mantienen una presencia constante, los "Espectáculos Visuales" (Sci-Fi, Acción, Aventura) han mostrado un ascenso notable en taquilla.' },
+                                { icon: 'fa-solid fa-stopwatch', title: 'El "Sweet Spot" de Duración', text: 'La duración promedio es de 123 min. El punto óptimo comercial está entre los 100 y 140 minutos, donde se concentra la mayor recaudación financiera.' },
+                                { icon: 'fa-solid fa-clapperboard', title: 'Eficiencia del Director', text: 'Directores como los Russo destacan por recaudación masiva. Sin embargo, las décadas más "eficientes" en rating vs. ingresos relativos fueron 1920 y 1990.' }
+                            ]
+                        },
+                        {
+                            type: 'conclusions',
+                            chapter: 'Resumen General',
+                            title: 'Correlaciones y Calificaciones',
+                            items: [
+                                { icon: 'fa-solid fa-ticket', title: 'Votos vs. Recaudación', text: 'Fuerte correlación positiva (0.60). Las películas que logran atraer a más usuarios para votar (hype/fandom) tienden a ser las que reportan mayores ingresos en taquilla.' },
+                                { icon: 'fa-solid fa-star-half-stroke', title: 'Rating IMDb vs. Taquilla', text: 'Baja correlación positiva (0.08). Un rating alto en IMDb no es un predictor fuerte de una alta recaudación; el prestigio crítico no equivale al éxito financiero masivo.' },
+                                { icon: 'fa-solid fa-hourglass-half', title: 'El Impacto de la Duración', text: 'Películas más largas no garantizan mejores calificaciones (correlación de 0.24) ni se traducen fuertemente en mayores ingresos económicos (correlación de 0.14).' },
+                                { icon: 'fa-solid fa-award', title: 'Apreciación de Géneros', text: 'Géneros como Guerra, Western y Cine Negro mostraron las calificaciones promedio más altas, siendo muy apreciados por la crítica, aunque no dominen la taquilla global.' }
+                            ]
+                        },
+                        { type: 'summary' },
+                        {
+                            type: 'framework-recap',
+                            chapter: 'Cierre de la Clase',
+                            title: 'Anatomía de una Historia con Datos',
+                            description: 'Cómo aplicamos la teoría (Knaflic + Harmon) para transformar 1,000 filas de una base de datos en un viaje memorable y persuasivo.',
+                            steps: [
+                                { icon: 'fa-solid fa-bullseye', title: 'El Propósito', text: 'Definimos una pregunta central (¿ha cambiado lo que es una buena historia?). Esto le dio un "Norte" claro a nuestro análisis y justificó el Viaje del Héroe.' },
+                                { icon: 'fa-solid fa-map', title: 'El Contexto', text: 'Enmarcamos la investigación en un escenario tangible (100 años, 17 variables) para que la audiencia dimensione el alcance de la aventura antes de ver un solo gráfico.' },
+                                { icon: 'fa-solid fa-compass', title: 'La Exploración', text: 'Navegamos a través de ejemplos específicos y hallazgos contraintuitivos, como la paradoja de popularidad vs. prestigio en el Film-Noir.' },
+                                { icon: 'fa-solid fa-chart-pie', title: 'Evidencia Visual', text: 'Utilizamos gráficas estructuradas (UpSet, Heatmaps, Burbujas) no para decorar, sino para revelar insights profundos y respaldar nuestros hallazgos con rigor analítico.' },
+                                { icon: 'fa-solid fa-bolt', title: 'Transformación', text: 'Consolidamos un argumento sólido (la migración del cine conceptual al espectáculo visual) para alterar y enriquecer la perspectiva inicial de la audiencia.' },
+                                { icon: 'fa-solid fa-door-open', title: 'Nuevos Paradigmas', text: 'Cerramos planteando nuevas incógnitas (ej. el impacto del streaming y la taquilla post-2020) para mantener viva la curiosidad y estimular futuras investigaciones.' }
+                            ]
+                        }
+                    ]
+                }
+            },
+            methods: {
+                nextSlide() {
+                    if (this.currentSlide < this.slides.length - 1) this.currentSlide++;
+                },
+                prevSlide() {
+                    if (this.currentSlide > 0) this.currentSlide--;
+                },
+                scrollCarousel(direction) {
+                    const container = this.$refs.carouselContainer;
+                    if (container) {
+                        // Calcula el desplazamiento: ancho de tarjeta (320px) + gap (24px)
+                        const scrollAmount = 344; 
+                        if (direction === 'left') {
+                            container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+                        } else {
+                            container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+                        }
+                    }
+                },
+                handleKeydown(e) {
+                    if (e.key === 'ArrowRight' || e.key === ' ') this.nextSlide();
+                    if (e.key === 'ArrowLeft') this.prevSlide();
+                }
+            },
+            mounted() {
+                window.addEventListener('keydown', this.handleKeydown);
+            },
+            beforeUnmount() {
+                window.removeEventListener('keydown', this.handleKeydown);
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
